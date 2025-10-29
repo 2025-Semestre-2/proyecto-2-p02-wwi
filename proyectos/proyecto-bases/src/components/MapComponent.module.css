@@ -1,0 +1,159 @@
+/* MapComponent.module.css */
+
+.mapContainer {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+.mapPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+  height: 100%;
+  color: var(--gray-700);
+}
+
+.mapIcon {
+  color: var(--primary);
+  margin-bottom: var(--space-3);
+}
+
+.mapContent h4 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--gray-800);
+  font-size: var(--text-lg);
+}
+
+.mapContent p {
+  margin: var(--space-1) 0;
+  color: var(--gray-600);
+  font-size: var(--text-sm);
+}
+
+.coordinates {
+  background: var(--white);
+  padding: var(--space-3);
+  border-radius: var(--border-radius);
+  margin: var(--space-3) 0;
+  border: 1px solid var(--gray-200);
+}
+
+.coordinates p {
+  margin: var(--space-1) 0;
+  font-family: monospace;
+  font-size: var(--text-xs);
+}
+
+.mapLink {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: var(--font-medium);
+  font-size: var(--text-sm);
+  margin: var(--space-3) 0;
+  transition: all 0.3s ease;
+}
+
+.mapLink:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mapNote {
+  display: block;
+  color: var(--gray-500);
+  font-style: italic;
+  font-size: var(--text-xs);
+  margin-top: var(--space-2);
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mapPlaceholder {
+    padding: var(--space-4);
+  }
+  
+  .mapContent h4 {
+    font-size: var(--text-base);
+  }
+  
+  .coordinates {
+    padding: var(--space-2);
+  }
+}
+
+/* Estilos adicionales para Leaflet */
+.mapInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  font-size: var(--text-sm);
+}
+
+.coordinatesInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gray-600);
+  font-family: monospace;
+}
+
+.externalLink {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.externalLink:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.popupContent {
+  text-align: center;
+  min-width: 200px;
+}
+
+.popupContent h4 {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--gray-800);
+  font-size: var(--text-base);
+}
+
+.popupContent p {
+  margin: var(--space-1) 0;
+  color: var(--gray-600);
+  font-size: var(--text-sm);
+}
+
+.googleMapsLink {
+  display: inline-block;
+  background-color: var(--primary);
+  color: white;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+  transition: background-color 0.2s ease;
+}
+
+.googleMapsLink:hover {
+  background-color: var(--primary-dark);
+  text-decoration: none;
+  color: white;
+}

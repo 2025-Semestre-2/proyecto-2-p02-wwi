@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: WWI-Docker
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Admin1234*
+      - MSSQL_PID=Express
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1540:1433"
+    volumes:
+      - wwi_data:/var/opt/mssql
+      - ./backups:/var/opt/mssql/backup
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Admin1234* -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  wwi_data:

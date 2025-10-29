@@ -1,0 +1,6 @@
+
+cd C:\Users\luist\OneDrive\Escritorio\P01-Bases\proyecto-1-LuisK19-main\proyectos\api
+npm start
+
+cd proyecto-1-LuisK19-main
+.\start-proyecto.ps1   
