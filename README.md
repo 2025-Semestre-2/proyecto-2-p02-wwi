@@ -3,6 +3,7 @@
 # [NOMBRE DEL PROYECTO]
 ### Nombre y carné de los integrantes: 
 Luis Trejos - 2022437816
+Tayler Wynta - 2024143103
 
 ### Estado del proyecto:
 
@@ -14,6 +15,7 @@ Recordar que el video debe ser público para ser visto por el profesor
 
 ### Nombre y carné de los integrantes: 
 Luis Trejos - 2022437816
+Tayler Wynta - 2024143103
 
 
 ## Descripción del Proyecto
