@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # SERVIDOR CORPORATIVO (Escazú)
+  # Puerto: 1433
+  # Base: WWI_Corporativo
+  # ==========================================
+  sql-corporativo:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: wwi-corporativo
+    hostname: corporativo
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "WideWorld2024!"
+      MSSQL_PID: "Developer"
+      MSSQL_AGENT_ENABLED: "true"
+      MSSQL_COLLATION: "Modern_Spanish_CI_AS"
+    ports:
+      - "1433:1433"
+    volumes:
+      - corporativo-data:/var/opt/mssql/data
+      - corporativo-log:/var/opt/mssql/log
+      - corporativo-backup:/var/opt/mssql/backup
+      - ./Script sql:/scripts:ro
+    networks:
+      - wwi-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "WideWorld2024!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+  # ==========================================
+  # SERVIDOR SAN JOSÉ
+  # Puerto: 1434
+  # Base: WWI_Sucursal_SJ
+  # ==========================================
+  sql-sanjose:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: wwi-sanjose
+    hostname: sanjose
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "WideWorld2024!"
+      MSSQL_PID: "Developer"
+      MSSQL_AGENT_ENABLED: "true"
+      MSSQL_COLLATION: "Modern_Spanish_CI_AS"
+    ports:
+      - "1434:1433"
+    volumes:
+      - sanjose-data:/var/opt/mssql/data
+      - sanjose-log:/var/opt/mssql/log
+      - sanjose-backup:/var/opt/mssql/backup
+      - ./Script sql:/scripts:ro
+    networks:
+      - wwi-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "WideWorld2024!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+  # ==========================================
+  # SERVIDOR LIMÓN
+  # Puerto: 1435
+  # Base: WWI_Sucursal_LIM
+  # ==========================================
+  sql-limon:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: wwi-limon
+    hostname: limon
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "WideWorld2024!"
+      MSSQL_PID: "Developer"
+      MSSQL_AGENT_ENABLED: "true"
+      MSSQL_COLLATION: "Modern_Spanish_CI_AS"
+    ports:
+      - "1435:1433"
+    volumes:
+      - limon-data:/var/opt/mssql/data
+      - limon-log:/var/opt/mssql/log
+      - limon-backup:/var/opt/mssql/backup
+      - ./Script sql:/scripts:ro
+    networks:
+      - wwi-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "WideWorld2024!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+volumes:
+  corporativo-data:
+  corporativo-log:
+  corporativo-backup:
+  sanjose-data:
+  sanjose-log:
+  sanjose-backup:
+  limon-data:
+  limon-log:
+  limon-backup:
+
+networks:
+  wwi-network:
+    driver: bridge
