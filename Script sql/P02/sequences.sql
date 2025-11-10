@@ -4,7 +4,8 @@
 -- Estas sequences se usan en los DEFAULT constraints de las tablas
 -- ============================================================================
 
-USE WWI_Corporativo;
+-- USE WWI_Sucursal_SJ;
+USE WWI_Sucursal_LIM;
 GO
 
 -- Schema Sequences ya fue creado en tables.sql
@@ -71,5 +72,5 @@ GO
 CREATE SEQUENCE [Sequences].[TransactionID] START WITH 1 INCREMENT BY 1;
 GO
 
-PRINT 'Sequences creadas exitosamente en WWI_Corporativo';
+PRINT 'Sequences creadas exitosamente';
 GO
