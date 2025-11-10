@@ -10,6 +10,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: wwi-corporativo
     hostname: corporativo
+    user: root
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "WideWorld2024!"
@@ -47,6 +48,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: wwi-sanjose
     hostname: sanjose
+    user: root
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "WideWorld2024!"
@@ -84,6 +86,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: wwi-limon
     hostname: limon
+    user: root
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "WideWorld2024!"
