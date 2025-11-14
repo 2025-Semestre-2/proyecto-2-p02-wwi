@@ -27,29 +27,41 @@ const baseConfig = {
     }
 };
 
-// Configuraciones especificas por base de datos
 const configs = {
-    corporativo: {
-        ...baseConfig,
-        server: 'localhost',
-        port: 1433,
-        database: 'WWI_Corporativo'
-    },
-    sanjose: {
-        ...baseConfig,
-        server: 'localhost',
-        port: 1434,
-        database: 'WWI_Sucursal_SJ'
-    },
-    limon: {
-        ...baseConfig,
-        server: 'localhost',
-        port: 1435,
-        database: 'WWI_Sucursal_LIM'
-    }
+  corporativo: {
+    ...baseConfig,
+    server: 'localhost',
+    port: 1444,               
+    database: 'WWI_Corporativo'
+  },
+  sanjose: {
+    ...baseConfig,
+    server: 'localhost',
+    port: 1445,                 
+    database: 'WWI_Sucursal_SJ'
+  },
+  limon: {
+    ...baseConfig,
+    server: 'localhost',
+    port: 1446,              
+    database: 'WWI_Sucursal_LIM'
+  }
 };
 
+
 // Pools de conexiones (uno por cada base de datos)
+
+
+// === agregado: helper simple de reintento ===
+const withRetry = async (fn, {retries=3, delayMs=500}={}) => {
+  let lastErr;
+  for (let i=0;i<retries;i++){
+    try { return await fn(); } catch (e) { lastErr = e; }
+    await new Promise(r=>setTimeout(r, delayMs*(i+1)));
+  }
+  throw lastErr;
+};
+
 const pools = {
     corporativo: null,
     sanjose: null,
@@ -74,7 +86,8 @@ const getConnection = async (database = 'corporativo') => {
         }
 
         // Crear nuevo pool
-        pools[database] = await sql.connect(configs[database]);
+        pools[database] = await withRetry(() => sql.connect(configs[database]), {retries:3, delayMs:400});
+        pools[database].on('error', err => console.error(`[POOL ${database}]`, err));
         console.log(`Conectado a ${database.toUpperCase()} (${configs[database].server}:${configs[database].port})`);
         
         return pools[database];

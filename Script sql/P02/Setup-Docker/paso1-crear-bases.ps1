@@ -16,9 +16,9 @@ Write-Host ""
 $password = "WideWorld2024!"
 
 $servidores = @(
-    @{Nombre="Corporativo"; Server="localhost,1433"; DB="WWI_Corporativo"; Container="wwi-corporativo"},
-    @{Nombre="San Jose"; Server="localhost,1434"; DB="WWI_Sucursal_SJ"; Container="wwi-sanjose"},
-    @{Nombre="Limon"; Server="localhost,1435"; DB="WWI_Sucursal_LIM"; Container="wwi-limon"}
+    @{Nombre="Corporativo"; Server="localhost,1444"; DB="WWI_Corporativo"; Container="wwi-corporativo"},
+    @{Nombre="San Jose"; Server="localhost,1445"; DB="WWI_Sucursal_SJ"; Container="wwi-sanjose"},
+    @{Nombre="Limon"; Server="localhost,1446"; DB="WWI_Sucursal_LIM"; Container="wwi-limon"}
 )
 
 # ============================================================================
