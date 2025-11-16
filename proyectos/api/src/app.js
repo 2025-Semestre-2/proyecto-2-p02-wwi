@@ -1,53 +1,64 @@
+﻿require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
 const morgan = require('morgan');
-require('dotenv').config();
-
-// Importar middlewares
-const { errorHandler, notFound } = require('./middleware/errorHandler');
-
-// Importar rutas
-const indexRoutes = require('./routes/index');
-const clientesRoutes = require('./routes/clientes');
-const inventariosRoutes = require('./routes/inventarios');
-const proveedoresRoutes = require('./routes/proveedores');
-const ventasRoutes = require('./routes/ventas'); 
-const estadisticasRoutes = require('./routes/estadisticas');
+const cors = require('cors');
+const db = require('./config/database');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
-// Middlewares globales
-app.use(helmet()); // Seguridad
-app.use(morgan('combined')); // Logging
-app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true
-}));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
 
-// Rutas
-app.use('/api', indexRoutes);
-app.use('/api/clientes', clientesRoutes);
-app.use('/api/inventarios', inventariosRoutes);
-app.use('/api/proveedores', proveedoresRoutes);
-app.use('/api/ventas', ventasRoutes);
-app.use('/api/estadisticas', estadisticasRoutes);
+// Routes existentes
+app.use('/api/clientes', require('./routes/clientes.routes'));
+app.use('/api/productos', require('./routes/productos.routes'));
 
-// Middleware para rutas no encontradas
-app.use(notFound);
+// âœ… NUEVO: Endpoints de distribuciÃ³n
+app.use('/api/distribucion', require('./routes/distribution.routes'));
 
-// Middleware de manejo de errores
-app.use(errorHandler);
-
-// Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`Servidor ejecutándose en puerto ${PORT}`);
-    console.log(`URL: http://localhost:${PORT}`);
-    console.log(`URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-    console.log(`Base de datos: ${process.env.DB_SERVER}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+app.get('/health', async (req, res) => {
+    const status = { 
+        api: 'OK', 
+        timestamp: new Date().toISOString(), 
+        databases: {} 
+    };
+    
+    for (const dbName of ['corporativo', 'sanJose', 'limon']) {
+        try {
+            const pool = await db.connect(dbName);
+            const result = await pool.request().query('SELECT 1 as test');
+            status.databases[dbName] = result.recordset[0].test === 1 ? 'OK' : 'ERROR';
+        } catch (error) {
+            status.databases[dbName] = 'ERROR';
+        }
+    }
+    res.json(status);
 });
 
-module.exports = app;
+app.get('/', (req, res) => {
+    res.json({
+        message: 'API WWI Distribuida',
+        version: '1.0.0',
+        endpoints: {
+            health: '/health',
+            clientes: '/api/clientes',
+            productos: '/api/productos',
+            // âœ… NUEVOS endpoints
+            distribucion: '/api/distribucion'
+        }
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`\nAPI corriendo en http://localhost:${PORT}`);
+    console.log(`Health: http://localhost:${PORT}/health`);
+    console.log(`DistribuciÃ³n: http://localhost:${PORT}/api/distribucion/estado\n`);
+});
+
+process.on('SIGINT', async () => {
+    console.log('\nCerrando...');
+    await db.closeAll();
+    process.exit(0);
+});
