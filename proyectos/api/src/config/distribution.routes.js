@@ -9,7 +9,7 @@ const ProductDistributor = require('../services/ProductDistributor');
  */
 router.post('/productos', async (req, res) => {
     try {
-        console.log('📨 Solicitud recibida para distribución de productos');
+        console.log('Solicitud recibida para distribución de productos');
         
         const distributor = new ProductDistributor();
         const result = await distributor.distributeProducts();
@@ -30,7 +30,7 @@ router.post('/productos', async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('❌ Error en endpoint de distribución:', error);
+        console.error('Error en endpoint de distribución:', error);
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor',

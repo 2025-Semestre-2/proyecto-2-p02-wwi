@@ -14,6 +14,11 @@
   --primary-lighter: var(--non-photo-blue);
   --primary-lightest: var(--light-cyan);
 
+  /* Colores de Bases*/
+  --corporativo: #1c4382ff;
+  --sanJose: #b91016ff;
+  --limon: #1c7e2fff;
+
   /* Colores funcionales */
   --white-bg: #fefefe;
   --white: #ffffff; 

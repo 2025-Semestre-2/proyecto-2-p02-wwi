@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
             health: '/health',
             clientes: '/api/clientes',
             productos: '/api/productos',
-            // âœ… NUEVOS endpoints
+            //  NUEVOS endpoints
             distribucion: '/api/distribucion'
         }
     });

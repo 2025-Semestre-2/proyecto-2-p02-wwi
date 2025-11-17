@@ -10,12 +10,87 @@
 .home-header {
   text-align: center;
   color: var(--white);
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .logo-container {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
+}
+
+/* Estilos para info de sucursal en header */
+.sucursal-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.sucursal-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  border: 2px solid;
+  color: white;
+}
+
+.sucursal-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sucursal-label {
+  font-size: 0.7rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sucursal-nombre {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.sucursal-detalles-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.8rem;
+  font-family: 'Courier New', monospace;
+}
+
+.btn-cerrar-sesion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.btn-cerrar-sesion:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
 }
 
 .logo-image {
