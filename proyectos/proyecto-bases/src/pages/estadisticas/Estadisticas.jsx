@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSucursal } from '../../context/useSucursal';
 import styles from './Estadisticas.module.css';
 import { 
   BarChart3, 
@@ -7,7 +8,8 @@ import {
   ShoppingCart, 
   Trophy, 
   TrendingUp, 
-  ArrowLeft 
+  ArrowLeft,
+  Database
 } from 'lucide-react';
 
 // Importar los componentes de cada pestaña
@@ -27,8 +29,15 @@ const TABS = [
 
 function Estadisticas() {
   const navigate = useNavigate();
+  const { sucursalActiva } = useSucursal();
   const [activeTab, setActiveTab] = useState('proveedores');
   const skipLinkRef = useRef(null);
+  
+  // Helper para obtener color de sucursal
+  const getSucursalColor = (id) => {
+    const colors = { 1: '#1c4382', 2: '#b91016', 3: '#1c7e2f' };
+    return colors[id] || '#1c4382';
+  };
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -67,10 +76,21 @@ function Estadisticas() {
           <ArrowLeft size={24} />
         </button>
         <div className={styles.headerContent}>
-          <h1 className={styles.headerTitle}>
-            <BarChart3 size={32} />
-            Módulo de Estadísticas
-          </h1>
+          <div className={styles.titleSection}>
+            <h1 className={styles.headerTitle}>
+              <BarChart3 size={32} />
+              Módulo de Estadísticas
+            </h1>
+            {sucursalActiva && (
+              <span 
+                className={styles.sucursalBadge}
+                style={{ backgroundColor: getSucursalColor(sucursalActiva.id) }}
+              >
+                <Database size={16} />
+                {sucursalActiva.nombre}
+              </span>
+            )}
+          </div>
           <p className={styles.headerSubtitle}>
             Consulta y análisis de datos clave del negocio
           </p>

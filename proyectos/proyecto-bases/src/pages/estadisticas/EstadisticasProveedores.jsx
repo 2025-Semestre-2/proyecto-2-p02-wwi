@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useSucursal } from '../../context/useSucursal';
 import EstadisticasService from '../../services/estadisticasService';
 import { BarChart3, Search, RefreshCw, AlertCircle } from 'lucide-react';
 import styles from './Estadisticas.module.css';
 
 function EstadisticasProveedores() {
+  const { sucursalActiva } = useSucursal();
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' | 'desc'
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,10 +21,12 @@ function EstadisticasProveedores() {
   const [maxTotal, setMaxTotal] = useState('');
 
   const loadEstadisticas = async () => {
+    if (!sucursalActiva) return;
+    
     setIsLoading(true);
     setError(null);
     try {
-      const response = await EstadisticasService.getEstadisticasComprasProveedores(filters);
+      const response = await EstadisticasService.getEstadisticasComprasProveedores(sucursalActiva.id, filters);
       // Los datos pueden venir en response.data[0] (array doble)
       let rawData = response.data || response;
       console.log('Raw data from API:', rawData);
@@ -51,8 +55,11 @@ function EstadisticasProveedores() {
   };
 
   useEffect(() => {
-    loadEstadisticas();
-  }, []);
+    if (sucursalActiva) {
+      loadEstadisticas();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sucursalActiva]);
 
   const handleInputChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });

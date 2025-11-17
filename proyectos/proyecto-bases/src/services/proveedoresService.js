@@ -3,9 +3,29 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 class ProveedoresService {
     /**
-     * Obtiene todos los proveedores con filtros opcionales y paginación
+     * Construye el endpoint según la sucursal seleccionada
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
+     * @returns {string} - Endpoint base para la sucursal
      */
-    static async getProveedores(params = {}) {
+    static _getEndpoint(sucursalId = 'corporativo') {
+        let endpoint = `${API_BASE_URL}/proveedores`;
+        
+        if (sucursalId === 'sanJose') {
+            endpoint = `${API_BASE_URL}/proveedores/sanjose`;
+        } else if (sucursalId === 'limon') {
+            endpoint = `${API_BASE_URL}/proveedores/limon`;
+        }
+        // corporativo usa el endpoint base (consolidado)
+        
+        return endpoint;
+    }
+
+    /**
+     * Obtiene todos los proveedores con filtros opcionales y paginación
+     * @param {Object} params - Parámetros de búsqueda y paginación
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
+     */
+    static async getProveedores(params = {}, sucursalId = 'corporativo') {
         try {
             const searchParams = new URLSearchParams();
             
@@ -29,7 +49,8 @@ class ProveedoresService {
                 searchParams.append('orderDirection', params.orderDirection);
             }
             
-            const url = `${API_BASE_URL}/proveedores${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const endpoint = this._getEndpoint(sucursalId);
+            const url = `${endpoint}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             console.log('ProveedoresService: Llamando a', url);
 
@@ -80,10 +101,12 @@ class ProveedoresService {
 
     /**
      * Obtiene las categorías de proveedores disponibles
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
      */
-    static async getSupplierCategories() {
+    static async getSupplierCategories(sucursalId = 'corporativo') {
         try {
-            const response = await fetch(`${API_BASE_URL}/proveedores/categories`, {
+            const endpoint = this._getEndpoint(sucursalId);
+            const response = await fetch(`${endpoint}/categories`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

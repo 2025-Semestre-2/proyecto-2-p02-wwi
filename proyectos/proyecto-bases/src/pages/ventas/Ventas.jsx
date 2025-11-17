@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSucursal } from '../../context/useSucursal';
 import VentasService from '../../services/ventasService';
 import styles from './Ventas.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -20,12 +21,21 @@ import {
     CreditCard,
     Calendar,
     User,
-    UserCheck
+    UserCheck,
+    Database
 } from 'lucide-react';
 
 
 const Ventas = () => {
     const navigate = useNavigate();
+    const { sucursalActiva } = useSucursal();
+    
+    // Helper para obtener color de sucursal
+    const getSucursalColor = (id) => {
+        const colors = { 1: '#1c4382', 2: '#b91016', 3: '#1c7e2f' };
+        return colors[id] || '#1c4382';
+    };
+    
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [ventas, setVentas] = useState([]);
@@ -48,10 +58,12 @@ const Ventas = () => {
 
     // Cargar ventas desde la API
     const loadVentas = async (params = {}) => {
+        if (!sucursalActiva) return;
+        
         setIsLoading(true);
         setError(null);
         try {
-            const { data, pagination: pag } = await VentasService.getVentas({
+            const { data, pagination: pag } = await VentasService.getVentas(sucursalActiva.id, {
                 searchText: params.search || filters.search,
                 startDate: params.startDate || filters.startDate,
                 endDate: params.endDate || filters.endDate,
@@ -76,13 +88,17 @@ const Ventas = () => {
     };
 
     useEffect(() => {
-        loadVentas({ pageNumber: 1 });
+        if (sucursalActiva) {
+            loadVentas({ pageNumber: 1 });
+        }
         // eslint-disable-next-line
-    }, []);
+    }, [sucursalActiva]);
 
     // Buscar ventas cuando cambian los filtros
     useEffect(() => {
-        loadVentas({ pageNumber: 1 });
+        if (sucursalActiva) {
+            loadVentas({ pageNumber: 1 });
+        }
         // eslint-disable-next-line
     }, [filters]);
 
@@ -105,10 +121,12 @@ const Ventas = () => {
 
     // Ver detalles de una venta
     const handleVerDetalles = async (venta) => {
+        if (!sucursalActiva) return;
+        
         setIsLoading(true);
         setError(null);
         try {
-            const { data } = await VentasService.getVentaById(venta.InvoiceID);
+            const { data } = await VentasService.getVentaById(sucursalActiva.id, venta.InvoiceID);
             setSelectedVenta(data);
             setShowModal(true);
         } catch (err) {
@@ -156,12 +174,23 @@ const Ventas = () => {
                     <ArrowLeft size={24} />
                 </button>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.headerTitle}>
-                        <Users size={28} />
-                        Gestión de Clientes
-                    </h1>
+                    <div className={styles.titleSection}>
+                        <h1 className={styles.headerTitle}>
+                            <Users size={28} />
+                            Gestión de Ventas
+                        </h1>
+                        {sucursalActiva && (
+                            <span 
+                                className={styles.sucursalBadge}
+                                style={{ backgroundColor: getSucursalColor(sucursalActiva.id) }}
+                            >
+                                <Database size={16} />
+                                {sucursalActiva.nombre}
+                            </span>
+                        )}
+                    </div>
                     <p className={styles.headerSubtitle}>
-                        Consulta y filtrado de clientes de Wide World Importers
+                        Consulta y gestión de ventas
                     </p>
                 </div>
             </header>

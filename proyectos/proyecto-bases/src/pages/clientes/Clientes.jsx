@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useSucursal from '../../context/useSucursal';
 import styles from './Clientes.module.css';
 import ClientesService from '../../services/clientesService';
 import MapComponent from '../../components/MapComponent';
@@ -21,19 +22,22 @@ import {
     CreditCard,
     Calendar,
     User,
-    UserCheck
+    UserCheck,
+    Database
 } from 'lucide-react';
 
 const Clientes = () => {
     const navigate = useNavigate();
+    const { sucursalActiva } = useSucursal();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [clientes, setClientes] = useState([]);
     const [filteredClientes, setFilteredClientes] = useState([]);
     const [selectedCliente, setSelectedCliente] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [searchText, setSearchText] = useState(''); // Texto de búsqueda temporal
     const [filters, setFilters] = useState({
-        search: '',
+        search: '', // Texto de búsqueda aplicado
         categoria: 'all'
     });
     const [currentPage, setCurrentPage] = useState(1);
@@ -42,6 +46,16 @@ const Clientes = () => {
     const [totalRecords, setTotalRecords] = useState(0);
     const clientesPerPage = 10;
     const skipLinkRef = useRef(null);
+
+    // Función helper para obtener color de sucursal
+    const getSucursalColor = () => {
+        switch(sucursalActiva?.id) {
+            case 'corporativo': return '#1c4382';
+            case 'sanJose': return '#b91016';
+            case 'limon': return '#1c7e2f';
+            default: return '#6b7280';
+        }
+    };
 
     // Función para cargar clientes con los nuevos datos completos
     const loadClientes = async (searchText = '', pageNumber = 1) => {
@@ -53,7 +67,7 @@ const Clientes = () => {
                 orderDirection: 'ASC',
                 pageNumber: pageNumber,
                 pageSize: clientesPerPage
-            });
+            }, sucursalActiva?.id || 'corporativo'); // Pasar ID de sucursal activa
 
             if (response.success) {
                 // Mapear los datos completos de la API al formato esperado por el frontend
@@ -138,19 +152,14 @@ const Clientes = () => {
         }
     };
 
-    // Carga inicial de datos
+    // Carga inicial de datos y recarga cuando cambia la sucursal
     useEffect(() => {
-        loadClientes();
-    }, []);
-
-    // Efecto para recargar datos cuando cambia la búsqueda
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            loadClientes(filters.search, 1); // Siempre volver a la página 1 en nueva búsqueda
-        }, 500); // Debounce de 500ms
-
-        return () => clearTimeout(timeoutId);
-    }, [filters.search]);
+        if (sucursalActiva) {
+            loadClientes(filters.search, 1);
+            setCurrentPage(1);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sucursalActiva]);
 
     // Filtrado local solo por categoría (la búsqueda se hace en el servidor)
     useEffect(() => {
@@ -164,6 +173,28 @@ const Clientes = () => {
         setCurrentPage(1);
     }, [filters.categoria, clientes]);
 
+    // Función para manejar la búsqueda con el botón
+    const handleSearch = () => {
+        loadClientes(searchText, 1); // Buscar con el texto ingresado
+        setFilters(prev => ({ ...prev, search: searchText }));
+        setCurrentPage(1);
+    };
+
+    // Función para limpiar la búsqueda
+    const handleClearSearch = () => {
+        setSearchText('');
+        setFilters(prev => ({ ...prev, search: '' }));
+        loadClientes('', 1);
+        setCurrentPage(1);
+    };
+
+    // Permitir buscar con Enter
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     // Paginación
     const indexOfLastCliente = currentPage * clientesPerPage;
     const indexOfFirstCliente = indexOfLastCliente - clientesPerPage;
@@ -176,15 +207,14 @@ const Clientes = () => {
         }));
     };
 
-    const handleSearchChange = (e) => {
-        handleFilterChange('search', e.target.value);
-    };
-
     const handleResetFilters = () => {
+        setSearchText('');
         setFilters({
             search: '',
             categoria: 'all'
         });
+        loadClientes('', 1);
+        setCurrentPage(1);
     };
 
     const handleVerDetalles = async (cliente) => {
@@ -307,12 +337,29 @@ const Clientes = () => {
                     <ArrowLeft size={24} />
                 </button>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.headerTitle}>
-                        <Users size={28} />
-                        Gestión de Clientes
-                    </h1>
+                    <div className={styles.titleSection}>
+                        <h1 className={styles.headerTitle}>
+                            <Users size={28} />
+                            Gestión de Clientes
+                        </h1>
+                        {sucursalActiva && (
+                            <div 
+                                className={styles.sucursalBadge}
+                                style={{ 
+                                    backgroundColor: getSucursalColor(),
+                                    color: 'white'
+                                }}
+                            >
+                                <Database size={16} />
+                                <span>{sucursalActiva.nombre}</span>
+                            </div>
+                        )}
+                    </div>
                     <p className={styles.headerSubtitle}>
-                        Consulta y filtrado de clientes de Wide World Importers
+                        {sucursalActiva?.id === 'corporativo' 
+                            ? 'Vista consolidada de todas las sucursales' 
+                            : `Clientes de sucursal ${sucursalActiva?.nombre}`
+                        }
                     </p>
                 </div>
             </header>
@@ -331,11 +378,31 @@ const Clientes = () => {
                             <input
                                 type="text"
                                 placeholder="Buscar por nombre de cliente"
-                                value={filters.search}
-                                onChange={handleSearchChange}
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                onKeyPress={handleKeyPress}
                                 className={styles.searchInput}
                                 aria-label="Buscar clientes"
                             />
+                            <button
+                                onClick={handleSearch}
+                                className={styles.searchButton}
+                                aria-label="Buscar"
+                                title="Buscar clientes"
+                            >
+                                <Search size={18} />
+                                Buscar
+                            </button>
+                            {searchText && (
+                                <button
+                                    onClick={handleClearSearch}
+                                    className={styles.clearButton}
+                                    aria-label="Limpiar búsqueda"
+                                    title="Limpiar búsqueda"
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </div>
 
                         <div className={styles.filterButtons}>

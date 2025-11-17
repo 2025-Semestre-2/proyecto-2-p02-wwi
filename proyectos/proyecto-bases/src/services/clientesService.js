@@ -3,9 +3,29 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 class ClientesService {
     /**
-     * Obtiene todos los clientes con filtros opcionales y paginación
+     * Construye el endpoint según la sucursal seleccionada
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
+     * @returns {string} - Endpoint base para la sucursal
      */
-    static async getClientes(params = {}) {
+    static _getEndpoint(sucursalId = 'corporativo') {
+        let endpoint = `${API_BASE_URL}/clientes`;
+        
+        if (sucursalId === 'sanJose') {
+            endpoint = `${API_BASE_URL}/clientes/sanjose`;
+        } else if (sucursalId === 'limon') {
+            endpoint = `${API_BASE_URL}/clientes/limon`;
+        }
+        // corporativo usa el endpoint base (consolidado)
+        
+        return endpoint;
+    }
+
+    /**
+     * Obtiene todos los clientes con filtros opcionales y paginación
+     * @param {Object} params - Parámetros de búsqueda y paginación
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
+     */
+    static async getClientes(params = {}, sucursalId = 'corporativo') {
         try {
             const searchParams = new URLSearchParams();
             
@@ -25,7 +45,8 @@ class ClientesService {
                 searchParams.append('pageSize', params.pageSize);
             }
             
-            const url = `${API_BASE_URL}/clientes${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const endpoint = this._getEndpoint(sucursalId);
+            const url = `${endpoint}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -70,8 +91,10 @@ class ClientesService {
 
     /**
      * Obtiene estadísticas de clientes
+     * @param {Object} params - Parámetros de búsqueda
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
      */
-    static async getClientesEstadisticas(params = {}) {
+    static async getClientesEstadisticas(params = {}, sucursalId = 'corporativo') {
         try {
             const searchParams = new URLSearchParams();
             
@@ -82,7 +105,8 @@ class ClientesService {
                 searchParams.append('categoria', params.categoria);
             }
             
-            const url = `${API_BASE_URL}/clientes/estadisticas${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const endpoint = this._getEndpoint(sucursalId);
+            const url = `${endpoint}/estadisticas${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -104,8 +128,10 @@ class ClientesService {
 
     /**
      * Obtiene el top de clientes por año
+     * @param {Object} params - Parámetros con años
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
      */
-    static async getTopClientesPorAnio(params = {}) {
+    static async getTopClientesPorAnio(params = {}, sucursalId = 'corporativo') {
         try {
             const searchParams = new URLSearchParams();
             
@@ -116,7 +142,8 @@ class ClientesService {
                 searchParams.append('anioFin', params.anioFin);
             }
             
-            const url = `${API_BASE_URL}/clientes/top-por-anio${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const endpoint = this._getEndpoint(sucursalId);
+            const url = `${endpoint}/top-por-anio${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -138,10 +165,12 @@ class ClientesService {
 
     /**
      * Obtiene las categorías de clientes disponibles
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
      */
-    static async getCategorias() {
+    static async getCategorias(sucursalId = 'corporativo') {
         try {
-            const response = await fetch(`${API_BASE_URL}/clientes/categorias`, {
+            const endpoint = this._getEndpoint(sucursalId);
+            const response = await fetch(`${endpoint}/categorias`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

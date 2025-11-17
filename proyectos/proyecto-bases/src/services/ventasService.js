@@ -3,9 +3,19 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 class VentasService {
 	/**
+	 * Obtiene el endpoint correcto según la sucursal
+	 */
+	static _getEndpoint(sucursalId) {
+		const base = API_BASE_URL + '/ventas';
+		if (sucursalId === 2) return base + '/sanjose';
+		if (sucursalId === 3) return base + '/limon';
+		return base;
+	}
+
+	/**
 	 * Obtiene todas las ventas con filtros y paginación
 	 */
-	static async getVentas(params = {}) {
+	static async getVentas(sucursalId, params = {}) {
 		try {
 			const searchParams = new URLSearchParams();
 			if (params.searchText) searchParams.append('searchText', params.searchText);
@@ -18,7 +28,8 @@ class VentasService {
 			if (params.pageNumber) searchParams.append('pageNumber', params.pageNumber);
 			if (params.pageSize) searchParams.append('pageSize', params.pageSize);
 
-			const url = `${API_BASE_URL}/ventas${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+			const baseUrl = this._getEndpoint(sucursalId);
+			const url = `${baseUrl}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
 			const response = await fetch(url, {
 				method: 'GET',
 				headers: { 'Content-Type': 'application/json' },
@@ -37,9 +48,10 @@ class VentasService {
 	/**
 	 * Obtiene una venta específica (factura) por ID
 	 */
-	static async getVentaById(id) {
+	static async getVentaById(sucursalId, id) {
 		try {
-			const response = await fetch(`${API_BASE_URL}/ventas/${id}`, {
+			const baseUrl = this._getEndpoint(sucursalId);
+			const response = await fetch(`${baseUrl}/${id}`, {
 				method: 'GET',
 				headers: { 'Content-Type': 'application/json' },
 			});

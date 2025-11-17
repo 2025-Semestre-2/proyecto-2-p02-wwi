@@ -20,15 +20,18 @@ import {
     Building,
     AlertCircle,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Database
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import useSucursal from '../../context/useSucursal';
 import proveedoresService from '../../services/proveedoresService';
 import MapComponent from '../../components/MapComponent';
 import styles from './Proveedores.module.css';
 
 const Proveedores = () => {
     const navigate = useNavigate();
+    const { sucursalActiva } = useSucursal();
 
     // Estados principales
     const [proveedores, setProveedores] = useState([]);
@@ -36,9 +39,20 @@ const Proveedores = () => {
     const [error, setError] = useState(null);
 
     // Estados de filtros
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchText, setSearchText] = useState(''); // Texto temporal
+    const [searchTerm, setSearchTerm] = useState(''); // Búsqueda aplicada
     const [selectedCategory, setSelectedCategory] = useState('');
     const [categories, setCategories] = useState([]);
+
+    // Función helper para obtener color de sucursal
+    const getSucursalColor = () => {
+        switch(sucursalActiva?.id) {
+            case 'corporativo': return '#1c4382';
+            case 'sanJose': return '#b91016';
+            case 'limon': return '#1c7e2f';
+            default: return '#6b7280';
+        }
+    };
 
     // Estados de paginación
     const [currentPage, setCurrentPage] = useState(1);
@@ -55,23 +69,18 @@ const Proveedores = () => {
     const hasNextPage = currentPage < totalPages;
     const hasPrevPage = currentPage > 1;
 
-    // Cargar categorías al montar el componente
-    // Cargar categorías al montar el componente
+    // Cargar categorías al montar y cuando cambie la sucursal
     useEffect(() => {
         const loadCategories = async () => {
+            if (!sucursalActiva) return;
+            
             try {
-                console.log('Proveedores] Cargando categorías...');
-                const response = await proveedoresService.getSupplierCategories();
+                console.log('[Proveedores] Cargando categorías...');
+                const response = await proveedoresService.getSupplierCategories(sucursalActiva.id);
 
                 console.log('[Proveedores] Respuesta completa de categorías:', response);
-                console.log('[Proveedores] Estructura de data:', response.data);
 
                 if (response.success && response.data) {
-                    // Log para ver la estructura de cada categoría
-                    response.data.forEach((cat, idx) => {
-                        console.log(`[Proveedores] Categoría ${idx}:`, cat);
-                    });
-
                     setCategories(response.data);
                     console.log('[Proveedores] Categorías cargadas:', response.data.length);
                 } else {
@@ -83,10 +92,12 @@ const Proveedores = () => {
         };
 
         loadCategories();
-    }, []);
+    }, [sucursalActiva]);
 
     // Función para cargar proveedores
     const loadProveedores = useCallback(async (page = 1, search = '', category = '') => {
+        if (!sucursalActiva) return;
+        
         try {
             setLoading(true);
             setError(null);
@@ -95,7 +106,8 @@ const Proveedores = () => {
                 page,
                 search,
                 category,
-                pageSize
+                pageSize,
+                sucursal: sucursalActiva.id
             });
 
             const response = await proveedoresService.getProveedores({
@@ -103,7 +115,7 @@ const Proveedores = () => {
                 pageSize,
                 search: search.trim(),
                 category: category || undefined
-            });
+            }, sucursalActiva.id);
 
             if (response.success && response.data) {
                 setProveedores(response.data.proveedores || []);
@@ -126,12 +138,14 @@ const Proveedores = () => {
         } finally {
             setLoading(false);
         }
-    }, [pageSize]);
+    }, [pageSize, sucursalActiva]);
 
-    // Cargar proveedores al montar y cuando cambien los filtros
+    // Cargar proveedores al montar y cuando cambien los filtros o la sucursal
     useEffect(() => {
-        loadProveedores(1, searchTerm, selectedCategory);
-    }, [loadProveedores, searchTerm, selectedCategory]);
+        if (sucursalActiva) {
+            loadProveedores(1, searchTerm, selectedCategory);
+        }
+    }, [loadProveedores, searchTerm, selectedCategory, sucursalActiva]);
 
     // Función para cargar detalles del proveedor
     const loadProveedorDetails = async (proveedorId) => {
@@ -171,9 +185,21 @@ const Proveedores = () => {
     };
 
     // Manejadores de eventos
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
+    const handleSearch = () => {
+        setSearchTerm(searchText);
         setCurrentPage(1);
+    };
+
+    const handleClearSearch = () => {
+        setSearchText('');
+        setSearchTerm('');
+        setCurrentPage(1);
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
     };
 
     const handleCategoryChange = (category) => {
@@ -182,6 +208,7 @@ const Proveedores = () => {
     };
 
     const handleReset = () => {
+        setSearchText('');
         setSearchTerm('');
         setSelectedCategory('');
         setCurrentPage(1);
@@ -267,12 +294,29 @@ const Proveedores = () => {
                     <ArrowLeft size={24} />
                 </button>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.headerTitle}>
-                        <Building2 size={32} />
-                        Gestión de Proveedores
-                    </h1>
+                    <div className={styles.titleSection}>
+                        <h1 className={styles.headerTitle}>
+                            <Building2 size={32} />
+                            Gestión de Proveedores
+                        </h1>
+                        {sucursalActiva && (
+                            <div 
+                                className={styles.sucursalBadge}
+                                style={{ 
+                                    backgroundColor: getSucursalColor(),
+                                    color: 'white'
+                                }}
+                            >
+                                <Database size={16} />
+                                <span>{sucursalActiva.nombre}</span>
+                            </div>
+                        )}
+                    </div>
                     <p className={styles.headerSubtitle}>
-                        Administra y consulta la información de todos los proveedores
+                        {sucursalActiva?.id === 'corporativo' 
+                            ? 'Vista consolidada de todas las sucursales' 
+                            : `Proveedores de sucursal ${sucursalActiva?.nombre}`
+                        }
                     </p>
                 </div>
             </header>
@@ -292,11 +336,31 @@ const Proveedores = () => {
                             <input
                                 type="text"
                                 placeholder="Buscar por nombre de proveedor"
-                                value={searchTerm}
-                                onChange={handleSearchChange}
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                onKeyPress={handleKeyPress}
                                 className={styles.searchInput}
                                 aria-label="Buscar proveedores"
                             />
+                            <button
+                                onClick={handleSearch}
+                                className={styles.searchButton}
+                                aria-label="Buscar"
+                                title="Buscar proveedores"
+                            >
+                                <Search size={18} />
+                                Buscar
+                            </button>
+                            {searchText && (
+                                <button
+                                    onClick={handleClearSearch}
+                                    className={styles.clearButton}
+                                    aria-label="Limpiar búsqueda"
+                                    title="Limpiar búsqueda"
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </div>
 
                         {/* Botones de categorías */}

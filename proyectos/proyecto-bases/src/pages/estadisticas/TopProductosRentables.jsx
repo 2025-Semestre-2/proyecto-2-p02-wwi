@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useSucursal } from '../../context/useSucursal';
 import EstadisticasService from '../../services/estadisticasService';
 import { TrendingUp, Search, RefreshCw, AlertCircle } from 'lucide-react';
 import styles from './Estadisticas.module.css';
 
 function TopProductosRentables() {
+  const { sucursalActiva } = useSucursal();
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' | 'desc'
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,8 +19,10 @@ function TopProductosRentables() {
   // Cargar años disponibles
   useEffect(() => {
     const loadAnios = async () => {
+      if (!sucursalActiva) return;
+      
       try {
-        const response = await EstadisticasService.getAniosDisponibles();
+        const response = await EstadisticasService.getAniosDisponibles(sucursalActiva.id);
         console.log('Respuesta API años:', response);
         
         // Los datos vienen en response.data[0] (array doble)
@@ -41,13 +45,15 @@ function TopProductosRentables() {
     };
     
     loadAnios();
-  }, []);
+  }, [sucursalActiva]);
 
   const loadEstadisticas = async () => {
+    if (!sucursalActiva) return;
+    
     setIsLoading(true);
     setError(null);
     try {
-      const response = await EstadisticasService.getTopProductosRentables({ anio });
+      const response = await EstadisticasService.getTopProductosRentables(sucursalActiva.id, { anio });
       console.log('Respuesta API productos:', response);
       
       // Los datos vienen en response.data[0] (array doble)

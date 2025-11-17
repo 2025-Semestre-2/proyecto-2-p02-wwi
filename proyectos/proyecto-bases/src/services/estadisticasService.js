@@ -3,9 +3,19 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 class EstadisticasService {
     /**
+     * Obtiene el endpoint correcto según la sucursal
+     */
+    static _getEndpoint(sucursalId) {
+        const base = API_BASE_URL + '/estadisticas';
+        if (sucursalId === 2) return base + '/sanjose';
+        if (sucursalId === 3) return base + '/limon';
+        return base;
+    }
+
+    /**
      * 1. Compras a proveedores con ROLLUP
      */
-    static async getEstadisticasComprasProveedores(params = {}) {
+    static async getEstadisticasComprasProveedores(sucursalId, params = {}) {
         try {
             const searchParams = new URLSearchParams();
             
@@ -16,7 +26,8 @@ class EstadisticasService {
                 searchParams.append('searchTextCategoria', params.searchTextCategoria);
             }
             
-            const url = `${API_BASE_URL}/estadisticas/proveedores/compras-rollup${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const baseUrl = this._getEndpoint(sucursalId);
+            const url = `${baseUrl}/proveedores/compras-rollup${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -39,7 +50,7 @@ class EstadisticasService {
     /**
      * 2. Ventas a clientes con ROLLUP
      */
-    static async getEstadisticasVentasClientes(params = {}) {
+    static async getEstadisticasVentasClientes(sucursalId, params = {}) {
         try {
             const searchParams = new URLSearchParams();
             
@@ -50,7 +61,8 @@ class EstadisticasService {
                 searchParams.append('searchTextCategoria', params.searchTextCategoria);
             }
             
-            const url = `${API_BASE_URL}/estadisticas/clientes/ventas-rollup${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const baseUrl = this._getEndpoint(sucursalId);
+            const url = `${baseUrl}/clientes/ventas-rollup${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -73,7 +85,7 @@ class EstadisticasService {
     /**
      * 3. Top 5 productos más rentables por año
      */
-    static async getTopProductosRentables(params = {}) {
+    static async getTopProductosRentables(sucursalId, params = {}) {
         try {
             const searchParams = new URLSearchParams();
             
@@ -81,7 +93,8 @@ class EstadisticasService {
                 searchParams.append('anio', params.anio);
             }
             
-            const url = `${API_BASE_URL}/estadisticas/productos/top-rentables${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const baseUrl = this._getEndpoint(sucursalId);
+            const url = `${baseUrl}/productos/top-rentables${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -104,7 +117,7 @@ class EstadisticasService {
     /**
      * 4. Top 5 clientes con más facturas por año
      */
-    static async getTopClientesFacturas(params = {}) {
+    static async getTopClientesFacturas(sucursalId, params = {}) {
         try {
             const searchParams = new URLSearchParams();
             
@@ -115,7 +128,8 @@ class EstadisticasService {
                 searchParams.append('anioFin', params.anioFin);
             }
             
-            const url = `${API_BASE_URL}/estadisticas/clientes/top-facturas${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const baseUrl = this._getEndpoint(sucursalId);
+            const url = `${baseUrl}/clientes/top-facturas${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -138,7 +152,7 @@ class EstadisticasService {
     /**
      * 5. Top 5 proveedores con más órdenes de compra por año
      */
-    static async getTopProveedoresOrdenes(params = {}) {
+    static async getTopProveedoresOrdenes(sucursalId, params = {}) {
         try {
             const searchParams = new URLSearchParams();
             
@@ -149,7 +163,8 @@ class EstadisticasService {
                 searchParams.append('anioFin', params.anioFin);
             }
             
-            const url = `${API_BASE_URL}/estadisticas/proveedores/top-ordenes${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+            const baseUrl = this._getEndpoint(sucursalId);
+            const url = `${baseUrl}/proveedores/top-ordenes${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -172,9 +187,10 @@ class EstadisticasService {
     /**
      * 6. Años disponibles
      */
-    static async getAniosDisponibles() {
+    static async getAniosDisponibles(sucursalId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/estadisticas/anios-disponibles`, {
+            const baseUrl = this._getEndpoint(sucursalId);
+            const response = await fetch(`${baseUrl}/anios-disponibles`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

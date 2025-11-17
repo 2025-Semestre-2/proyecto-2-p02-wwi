@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSucursal } from '../../context/useSucursal';
 import InventariosService from '../../services/inventariosService';
 // import InventariosEstadisticas from './InventariosEstadisticas';
 // import TopProductos from './TopProductos';
@@ -21,12 +22,20 @@ import {
     ChevronRight,
     Info,
     DollarSign,
-    Hash
+    Hash,
+    Database
 } from 'lucide-react';
 
 const Inventarios = () => {
     const navigate = useNavigate();
     const skipLinkRef = useRef(null);
+    const { sucursalActiva } = useSucursal();
+    
+    // Helper para obtener color de sucursal
+    const getSucursalColor = (id) => {
+        const colors = { 1: '#1c4382', 2: '#b91016', 3: '#1c7e2f' };
+        return colors[id] || '#1c4382';
+    };
     
     // Estados principales
     const [stockItems, setStockItems] = useState([]);
@@ -52,19 +61,23 @@ const Inventarios = () => {
     const [activeTab, setActiveTab] = useState('productos');
 
     useEffect(() => {
-        loadStockGroups();
-        loadStockItems();
+        if (sucursalActiva) {
+            loadStockGroups();
+            loadStockItems();
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [sucursalActiva]);
 
     useEffect(() => {
-        loadStockItems();
+        if (sucursalActiva) {
+            loadStockItems();
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, pageSize, orderBy, orderDirection]);
 
     const loadStockGroups = async () => {
         try {
-            const response = await InventariosService.getStockGroups();
+            const response = await InventariosService.getStockGroups(sucursalActiva.id);
             if (response.success) {
                 setStockGroups(response.data);
             }
@@ -88,7 +101,7 @@ const Inventarios = () => {
                 pageSize
             };
 
-            const response = await InventariosService.getStockItems(params);
+            const response = await InventariosService.getStockItems(sucursalActiva.id, params);
 
             if (response.success) {
                 setStockItems(response.data);
@@ -252,13 +265,14 @@ const Inventarios = () => {
                         >
                             <Search size={16} />
                             {loading ? 'Cargando...' : 'Buscar'}
-                        {/* <button
-                            className={`${styles.tabButton} ${activeTab === 'top-productos' ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('top-productos')}
-                            aria-selected={activeTab === 'top-productos'}
-                            >
-                            <Trophy className={styles.tabIcon} /> Top Productos
-                        </button> */}
+                        </button>
+                        <button 
+                            onClick={handleClearFilters} 
+                            className={styles.clearButton}
+                            disabled={loading}
+                        >
+                            <RefreshCw size={16} />
+                            Limpiar Filtros
                         </button>
                     </div>
                 </div>
@@ -481,10 +495,21 @@ const Inventarios = () => {
                 </button>
                 
                 <div className={styles.headerContent}>
-                    <h1 className={styles.headerTitle}>
-                        <Package size={28} />
-                        Gestión de Inventarios
-                    </h1>
+                    <div className={styles.titleSection}>
+                        <h1 className={styles.headerTitle}>
+                            <Package size={28} />
+                            Gestión de Inventarios
+                        </h1>
+                        {sucursalActiva && (
+                            <span 
+                                className={styles.sucursalBadge}
+                                style={{ backgroundColor: getSucursalColor(sucursalActiva.id) }}
+                            >
+                                <Database size={16} />
+                                {sucursalActiva.nombre}
+                            </span>
+                        )}
+                    </div>
                     <p className={styles.headerSubtitle}>
                         Sistema de gestión de productos, stock y análisis estadístico
                     </p>
@@ -493,11 +518,55 @@ const Inventarios = () => {
 
             {/* Contenido principal */}
             <main id="main-content" className={styles.mainContent}>
+                {/* Navegación por pestañas */}
+                <div className={styles.tabNavigation}>
+                    <button
+                        className={`${styles.tabButton} ${activeTab === 'productos' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('productos')}
+                        aria-selected={activeTab === 'productos'}
+                    >
+                        <Package size={18} />
+                        Lista de Productos
+                    </button>
+                    <button
+                        className={`${styles.tabButton} ${activeTab === 'grupos' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('grupos')}
+                        aria-selected={activeTab === 'grupos'}
+                    >
+                        <BarChart3 size={18} />
+                        Grupos de Stock ({stockGroups.length})
+                    </button>
+                </div>
+
                 {/* Contenido de pestañas */}
                 <div className={styles.tabContent}>
                     {activeTab === 'productos' && renderProductList()}
-                    {/* {activeTab === 'estadisticas' && <InventariosEstadisticas stockGroups={stockGroups} />} */}
-                    {/* {activeTab === 'top-productos' && <TopProductos />} */}
+                    {activeTab === 'grupos' && (
+                        <section className={styles.gruposSection}>
+                            <h2 className={styles.sectionTitle}>
+                                <BarChart3 size={24} />
+                                Grupos de Stock
+                            </h2>
+                            {stockGroups.length === 0 ? (
+                                <div className={styles.emptyState}>
+                                    <FileX size={64} className={styles.emptyIcon} />
+                                    <h3 className={styles.emptyTitle}>No hay grupos de stock</h3>
+                                    <p className={styles.emptyMessage}>
+                                        No se encontraron grupos de stock disponibles.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className={styles.gruposGrid}>
+                                    {stockGroups.map((grupo) => (
+                                        <div key={grupo.StockGroupID} className={styles.grupoCard}>
+                                            <h3>{grupo.StockGroupName}</h3>
+                                            <p className={styles.grupoId}>ID: {grupo.StockGroupID}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
                 </div>
             </main>
         </div>

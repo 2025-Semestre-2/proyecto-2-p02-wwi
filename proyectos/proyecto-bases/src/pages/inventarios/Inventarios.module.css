@@ -125,6 +125,26 @@
   flex: 1;
 }
 
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.sucursalBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--federal-blue);
+  color: var(--white);
+  border-radius: var(--border-radius);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  box-shadow: var(--shadow-sm);
+}
+
 .headerTitle {
   display: flex;
   align-items: center;
@@ -1661,4 +1681,72 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ===== GRUPOS DE STOCK ===== */
+.gruposSection {
+  background: var(--white);
+  padding: var(--space-6);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-6);
+}
+
+.gruposGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.grupoCard {
+  background: var(--gray-50);
+  padding: var(--space-4);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+}
+
+.grupoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.grupoCard h3 {
+  color: var(--gray-800);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.grupoId {
+  color: var(--gray-600);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--gray-200);
+  color: var(--gray-700);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clearButton:hover:not(:disabled) {
+  background: var(--gray-300);
+  color: var(--gray-800);
+}
+
+.clearButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

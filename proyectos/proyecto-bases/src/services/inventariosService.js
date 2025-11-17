@@ -2,9 +2,28 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 class InventariosService {
     /**
-     * Obtiene todos los productos con filtros opcionales y paginación
+     * Construye el endpoint según la sucursal seleccionada
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
+     * @returns {string} - Endpoint base para la sucursal
      */
-    static async getStockItems(params = {}) {
+    static _getEndpoint(sucursalId = 'corporativo') {
+        let endpoint = `${API_BASE_URL}/inventarios`;
+        
+        if (sucursalId === 'sanJose') {
+            endpoint = `${API_BASE_URL}/inventarios/sanjose`;
+        } else if (sucursalId === 'limon') {
+            endpoint = `${API_BASE_URL}/inventarios/limon`;
+        }
+        
+        return endpoint;
+    }
+
+    /**
+     * Obtiene todos los productos con filtros opcionales y paginación
+     * @param {Object} params - Parámetros de búsqueda y paginación
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
+     */
+    static async getStockItems(params = {}, sucursalId = 'corporativo') {
         try {
             const queryParams = new URLSearchParams();
 
@@ -17,7 +36,8 @@ class InventariosService {
             if (params.pageNumber) queryParams.append('pageNumber', params.pageNumber);
             if (params.pageSize) queryParams.append('pageSize', params.pageSize);
 
-            const url = `${API_BASE_URL}/inventarios${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+            const endpoint = this._getEndpoint(sucursalId);
+            const url = `${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
             
             console.log('InventariosService: Llamando a', url);
 
@@ -58,10 +78,12 @@ class InventariosService {
 
     /**
      * Obtiene todos los grupos de stock para filtros dinámicos
+     * @param {string} sucursalId - ID de la sucursal (corporativo, sanJose, limon)
      */
-    static async getStockGroups() {
+    static async getStockGroups(sucursalId = 'corporativo') {
         try {
-            const response = await fetch(`${API_BASE_URL}/inventarios/stock-groups`);
+            const endpoint = this._getEndpoint(sucursalId);
+            const response = await fetch(`${endpoint}/stock-groups`);
 
             if (!response.ok) {
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
